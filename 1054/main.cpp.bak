@@ -1,0 +1,73 @@
+#include "debug_helper.h"
+
+using namespace std;
+
+class Solution {
+public:
+    vector<int> rearrangeBarcodes(vector<int>& barcodes) {
+        if (barcodes.size() <= 2) {
+            return barcodes;
+        }
+        vector<int> num_count(10001, 0);
+        int max_num = 0;
+        for(const auto& num : barcodes) {
+            num_count[num] ++;
+            max_num = max(max_num, num);
+        }
+        max_num ++;
+        list<int> num_list;
+        for (int num = 1; num < max_num; num++) {
+            if (num_count[num]) {
+                num_list.push_back(num);
+            }
+        }
+        vector<int> result;
+        int start_left = -1;
+        while (num_list.size() != 0) {
+            cout << num_list << endl;
+            if (num_list.size() == 1) {
+                result.push_back(num_list.front());
+                break;
+            }
+            int num_left = num_list.front();
+            int num_right = num_list.back();
+            int count_left = num_count[num_left];
+            int count_right = num_count[num_right];
+            int output_count = min(count_right, count_left);
+            num_count[num_left] -= output_count;
+            num_count[num_right] -= output_count;
+            if (start_left == -1) {
+                start_left = int(count_left > count_right);
+            }
+            while (output_count--) {
+                if (start_left) {
+                    result.push_back(num_left);
+                    result.push_back(num_right);
+                } else {
+                    result.push_back(num_right);
+                    result.push_back(num_left);
+                }
+            }
+            if (count_left == count_right) {
+                num_list.pop_front();
+                num_list.pop_back();
+            } else if (count_left > count_right) {
+                num_list.pop_back();
+                start_left = 1;
+            } else {
+                num_list.pop_front();
+                start_left = 0;
+            }
+        }
+        return result;
+    }
+};
+
+int main() {
+    vector<int> input = {2,2,1,3};
+    // vector<int> input = {1,1,1,1,2,2,3,3};
+    // vector<int> input = {1,1,1,1,2,2,3};
+    Solution solution;
+    cout << solution.rearrangeBarcodes(input) << endl;
+    return 0;
+}
