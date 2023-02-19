@@ -45,54 +45,7 @@ void setPrintIndent(int indent) {
     _indent_str = string(indent, ' ');
 }
 
-template<typename T1, typename T2>
-ostream &operator << (ostream &out, const map<T1, T2> &out_data) {
-    const void* hash_key = static_cast<const void*>(&out_data);
-    int indent = 0;
-    if (_beauty && print_depth.find(hash_key) != print_depth.end()) {
-        indent = print_depth[hash_key];
-    }
-    string indent_str(indent * _indent, ' ');
-    if (out_data.size() == 0) {
-        out << "{}";
-        return out;
-    }
-    for (auto item = out_data.begin();item != out_data.end(); item++){
-        string line_str = "";
-        // 处理前置内容
-        if (item == out_data.begin()) {
-            line_str += _beauty ? "{\n" : "{";
-        }
-        line_str += _beauty ? indent_str + _indent_str : "";
-        out << line_str;
-        
-        // 打印Key部分
-        const T1& key = item->first;
-        // Key不做输出美化
-        bool old_beauty = _beauty;
-        setPrintBeauty(false);
-        out << key << ": ";
-        setPrintBeauty(old_beauty);
-        
-        // 打印Value部分
-        const T2& value = item->second;
-        const void* sub_item_hash_key = static_cast<const void*>(&value);
-        print_depth[sub_item_hash_key] = indent + 1;
-        out << value;
-        print_depth.erase(sub_item_hash_key);
-
-        // 打印尾端部分
-        if (item == --out_data.end()) {
-            line_str = string("") + (_beauty ? "\n" : "") + indent_str + "}";
-        } else {
-            line_str = _beauty ? ",\n" : ", ";
-        }
-        out << line_str;
-    }
-    return out;
-}
-
-#define AUTOGEN(Type, Left_Bracket, Right_Bracket) \
+#define AUTOGEN1(Type, Left_Bracket, Right_Bracket) \
 template<typename T>\
 ostream &operator << (ostream &out, const Type<T> &out_data) {\
     const void * hash_key = static_cast<const void*>(&out_data);\
@@ -128,8 +81,74 @@ ostream &operator << (ostream &out, const Type<T> &out_data) {\
     return out;\
 }
 
-AUTOGEN(vector, "[", "]");
-AUTOGEN(list, "[", "]");
-AUTOGEN(queue, "[", "]");
-AUTOGEN(deque, "[", "]");
-AUTOGEN(set, "(", ")");
+#define AUTOGEN2(Type, Left_Bracket, Right_Bracket) \
+template<typename T1, typename T2>\
+ostream &operator << (ostream &out, const Type<T1, T2> &out_data) {\
+    const void* hash_key = static_cast<const void*>(&out_data);\
+    int indent = 0;\
+    if (_beauty && print_depth.find(hash_key) != print_depth.end()) {\
+        indent = print_depth[hash_key];\
+    }\
+    string indent_str(indent * _indent, ' ');\
+    if (out_data.size() == 0) {\
+        out << Left_Bracket << Right_Bracket;\
+        return out;\
+    }\
+    for (auto item = out_data.begin();item != out_data.end(); item++){\
+        string line_str = "";\
+        if (item == out_data.begin()) {\
+            line_str += _beauty ? Left_Bracket"\n" : Left_Bracket;\
+        }\
+        line_str += _beauty ? indent_str + _indent_str : "";\
+        out << line_str;\
+        \
+        const T1& key = item->first;\
+        bool old_beauty = _beauty;\
+        setPrintBeauty(false);\
+        out << key << ": ";\
+        setPrintBeauty(old_beauty);\
+        \
+        const T2& value = item->second;\
+        const void* sub_item_hash_key = static_cast<const void*>(&value);\
+        print_depth[sub_item_hash_key] = indent + 1;\
+        out << value;\
+        print_depth.erase(sub_item_hash_key);\
+        \
+        if (item == --out_data.end()) {\
+            line_str = string("") + (_beauty ? "\n" : "") + indent_str + Right_Bracket;\
+        } else {\
+            line_str = _beauty ? ",\n" : ", ";\
+        }\
+        out << line_str;\
+    }\
+    return out;\
+}
+
+AUTOGEN1(vector, "[", "]");
+AUTOGEN1(set, "(", ")");
+AUTOGEN1(list, "[", "]");
+AUTOGEN1(queue, "[", "]");
+AUTOGEN1(deque, "[", "]");
+
+AUTOGEN2(map, "{", "}");
+
+template<typename T1, typename T2, typename T3>
+ostream &operator << (ostream &out, const priority_queue<T1, T2, T3> &out_data) {
+    vector<T1> content;
+    priority_queue<T1, T2, T3> out_data_copy= out_data;
+    while(!out_data_copy.empty()) {
+        content.push_back(out_data_copy.top());
+        out_data_copy.pop();
+    }
+    out << content;
+    return out;
+}
+
+template<typename T1, typename T2>
+ostream &operator << (ostream &out, const pair<T1, T2> &out_data) {
+    map<T1, T2> content;
+    content[out_data.first] = out_data.second;
+    out << content;
+    return out;
+}
+
