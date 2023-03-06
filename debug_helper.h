@@ -59,6 +59,7 @@ ostream &operator << (ostream &out, const Type<T> &out_data) {\
         out << Left_Bracket << Right_Bracket;\
         return out;\
     }\
+    int index = 0;\
     for (auto item = out_data.begin();item != out_data.end(); item++){\
         string line_str = "";\
         if (item == out_data.begin()) {\
@@ -72,12 +73,13 @@ ostream &operator << (ostream &out, const Type<T> &out_data) {\
         out << *item;\
         print_depth.erase(sub_item_hash_key);\
         \
-        if (item == --out_data.end()) {\
-            line_str = string("") + (_beauty ? "\n" : "") + indent_str + Right_Bracket;\
+        if (index == out_data.size() - 1) {\
+            line_str = string() + (_beauty ? "\n" : "") + indent_str + Right_Bracket;\
         } else {\
             line_str = _beauty ? ",\n" : ", ";\
         }\
         out << line_str;\
+        index++;\
     }\
     return out;\
 }
@@ -127,11 +129,13 @@ ostream &operator << (ostream &out, const Type<T1, T2> &out_data) {\
 
 AUTOGEN1(vector, "[", "]");
 AUTOGEN1(set, "(", ")");
+AUTOGEN1(unordered_set, "(", ")");
 AUTOGEN1(list, "[", "]");
 AUTOGEN1(queue, "[", "]");
 AUTOGEN1(deque, "[", "]");
 
 AUTOGEN2(map, "{", "}");
+AUTOGEN2(unordered_map, "{", "}");
 
 template<typename T1, typename T2, typename T3>
 ostream &operator << (ostream &out, const priority_queue<T1, T2, T3> &out_data) {
