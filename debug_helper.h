@@ -135,6 +135,7 @@ AUTOGEN1(unordered_set, "(", ")");
 AUTOGEN1(list, "[", "]");
 AUTOGEN1(queue, "[", "]");
 AUTOGEN1(deque, "[", "]");
+AUTOGEN1(stack, "[", "]");
 
 AUTOGEN2(map, "{", "}");
 AUTOGEN2(unordered_map, "{", "}");
