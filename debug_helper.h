@@ -16,7 +16,6 @@
 #include <numeric>
 #include <iterator>
 #include <set>
-
 #include <cmath>
 #include <cstdio>
 #include <ctype.h>
